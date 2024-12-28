@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meteo per Piloti</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            width: 100%;
+        }
+        main {
+            padding: 2rem;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        .weather-info {
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .weather-info h2 {
+            margin: 0.5rem 0;
+        }
+        footer {
+            margin-top: auto;
+            padding: 1rem;
+            background: #333;
+            color: #fff;
+            text-align: center;
+            width: 100%;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            background: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Meteo e Vento per Piloti</h1>
+    </header>
+    <main>
+        <p>Inserisci il nome del circuito o della città per ottenere le informazioni meteo.</p>
+        <input type="text" id="location" placeholder="Es: Monza, Italia" style="padding: 0.5rem; width: 80%;">
+        <button onclick="getWeather()">Ottieni Meteo</button>
+        <div class="weather-info" id="weather-info" style="display: none;">
+            <h2 id="location-name"></h2>
+            <p><strong>Temperatura:</strong> <span id="temperature"></span>°C</p>
+            <p><strong>Velocità del vento:</strong> <span id="wind-speed"></span> km/h</p>
+            <p><strong>Direzione del vento:</strong> <span id="wind-direction"></span></p>
+            <p><strong>Condizioni:</strong> <span id="conditions"></span></p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Meteo per Piloti. Tutti i diritti riservati.</p>
+    </footer>
+
+    <script>
+        async function getWeather() {
+            const apiKey = "INSERISCI_LA_TUA_API_KEY"; // Ottieni una chiave API gratuita da OpenWeatherMap
+            const location = document.getElementById("location").value;
+            const weatherInfo = document.getElementById("weather-info");
+            
+            if (!location) {
+                alert("Per favore, inserisci una località!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric&lang=it`);
+                if (!response.ok) {
+                    alert("Impossibile trovare il meteo per questa località.");
+                    return;
+                }
+                const data = await response.json();
+                
+                document.getElementById("location-name").textContent = `${data.name}, ${data.sys.country}`;
+                document.getElementById("temperature").textContent = data.main.temp;
+                document.getElementById("wind-speed").textContent = (data.wind.speed * 3.6).toFixed(1); // Converti da m/s a km/h
+                document.getElementById("wind-direction").textContent = getWindDirection(data.wind.deg);
+                document.getElementById("conditions").textContent = data.weather[0].description;
+
+                weatherInfo.style.display = "block";
+            } catch (error) {
+                alert("Errore durante il recupero dei dati meteo. Riprova.");
+                console.error(error);
+            }
+        }
+
+        function getWindDirection(deg) {
+            const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+            const index = Math.round((deg % 360) / 45) % 8;
+            return directions[index];
+        }
+    </script>
+</body>
+</html>
+
